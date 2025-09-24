@@ -1,0 +1,10 @@
+Materia,Inscritos,Sala,Capacidade,Espaco_Ocioso,Utilizacao_%,Tipo_Sala,Local,Horario
+Cálculo I,30,Sala IC-103,35,5,85.71,aula,ic,Segunda 08:00-10:00
+Programação I,25,Lab IC-202,25,0,100.0,laboratorio,ic,Segunda 10:00-12:00
+Álgebra Linear,35,Sala IC-103,35,0,100.0,aula,ic,Segunda 14:00-16:00
+Estruturas de Dados,20,Lab IC-202,25,5,80.0,laboratorio,ic,Terça 08:00-10:00
+Estatística,40,Sala IC-102,40,0,100.0,aula,ic,Terça 10:00-12:00
+Banco de Dados,30,Lab IC-201,30,0,100.0,laboratorio,ic,Terça 14:00-16:00
+Algoritmos,25,Sala IC-103,35,10,71.43,aula,ic,Quarta 08:00-10:00
+Redes,20,Lab IC-202,25,5,80.0,laboratorio,ic,Quarta 10:00-12:00
+Probabilidade,35,Sala IC-103,35,0,100.0,aula,ic,Quarta 14:00-16:00
