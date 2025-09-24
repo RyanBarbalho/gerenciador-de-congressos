@@ -137,6 +137,7 @@ class AlocadorSalas:
                     )
         
         # 3. Sem conflito de horários na mesma sala
+        #TODO: verificar funcionamento dessa hrad constraint com os dados do IC
         horarios = self._agrupar_por_horario()
         for horario, materias_horario in horarios.items():
             for sala in self.salas:
@@ -257,7 +258,7 @@ def criar_dados_exemplo():
     # Criar matérias
     materias = [
         Materia("MAT001", "Cálculo I", 45, "Segunda 08:00-10:00", False, ["projetor", "quadro"]),
-        Materia("MAT002", "Cálculo II", 38, "Segunda 10:00-12:00", False, ["projetor", "quadro"]),
+        Materia("MAT002", "Cálculo II", 38, "Segunda 08:00-10:00", False, ["projetor", "quadro"]),
         Materia("COMP001", "Programação I", 30, "Segunda 14:00-16:00", True, ["computadores"]),
         Materia("COMP002", "Estruturas de Dados", 25, "Segunda 16:00-18:00", True, ["computadores"]),
         Materia("COMP003", "Algoritmos", 20, "Terça 08:00-10:00", False, ["projetor", "quadro"]),
