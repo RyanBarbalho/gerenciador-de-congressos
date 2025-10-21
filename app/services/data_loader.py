@@ -74,26 +74,61 @@ class CSVRepository(Repository):
         
         # Mapear códigos de horário
         dias_map = {
-            '2': 'Segunda', '3': 'Terça', '4': 'Quarta', 
+            '1': 'Domingo', '2': 'Segunda', '3': 'Terça', '4': 'Quarta', 
             '5': 'Quinta', '6': 'Sexta', '7': 'Sábado'
         }
         
-        turnos_map = {
-            'M': '08:00-10:00',  # Manhã
-            'T': '10:00-12:00',  # Tarde
-            'N': '19:00-21:00'   # Noite
+        # Horários por turno e período
+        horarios_map = {
+            'M': {  # Manhã
+                '1': '07:00-07:50', '2': '08:00-08:50', '3': '09:00-09:50',
+                '4': '10:00-10:50', '5': '11:00-11:50', '6': '12:00-12:50'
+            },
+            'T': {  # Tarde
+                '1': '12:00-12:50', '2': '13:00-13:50', '3': '14:00-14:50',
+                '4': '15:00-15:50', '5': '16:00-16:50', '6': '17:00-17:50'
+            },
+            'N': {  # Noite
+                '1': '18:00-18:50', '2': '18:50-19:40', '3': '19:40-20:30',
+                '4': '20:30-21:20', '5': '21:20-22:10', '6': '22:10-23:00'
+            }
         }
         
-        # Extrair dia, turno e período
-        match = re.match(r'(\d+)([MTN])(\d+)', horario_str)
+        # Tratar múltiplos horários (separados por espaço)
+        if ' ' in horario_str:
+            horarios = horario_str.split()
+            horarios_mapeados = []
+            for h in horarios:
+                horarios_mapeados.append(self._mapear_horario_simples(h, dias_map, horarios_map))
+            return ' | '.join(horarios_mapeados)
+        
+        return self._mapear_horario_simples(horario_str, dias_map, horarios_map)
+    
+    def _mapear_horario_simples(self, horario_str: str, dias_map: dict, horarios_map: dict) -> str:
+        """Mapeia um horário simples baseado no formato: dias + turno + horários"""
+        # Padrão: dias + turno + horários (ex: 24T34, 6M12, 2M1234)
+        match = re.match(r'^([1-7]+)([MTN])([1-6]+)$', horario_str)
         if match:
-            dia_num = match.group(1)
+            dias_codigo = match.group(1)
             turno = match.group(2)
+            horarios_codigo = match.group(3)
             
-            dia = dias_map.get(dia_num, f"Dia{dia_num}")
-            horario = turnos_map.get(turno, "Indefinido")
+            # Mapear dias
+            dias_nomes = []
+            for dia_num in dias_codigo:
+                if dia_num in dias_map:
+                    dias_nomes.append(dias_map[dia_num])
             
-            return f"{dia} {horario}"
+            # Mapear horários
+            horarios_lista = []
+            for horario_num in horarios_codigo:
+                if turno in horarios_map and horario_num in horarios_map[turno]:
+                    horarios_lista.append(horarios_map[turno][horario_num])
+            
+            if dias_nomes and horarios_lista:
+                dias_str = '/'.join(dias_nomes)
+                horarios_str = '/'.join(horarios_lista)
+                return f"{dias_str} {horarios_str}"
         
         return horario_str
     

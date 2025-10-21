@@ -17,31 +17,51 @@ def main():
 
     try:
         # Importar e usar o sistema refatorado
-        from app.core.facade import SistemaAlocacaoFacade, demonstrar_padroes
+        from app.core.facade import SistemaAlocacaoFacade
         
-        # Demonstrar todos os padrões
-        comparacao = demonstrar_padroes()
-        
-        # Tentar carregar dados reais
-        print("\n=== TENTATIVA DE CARREGAR DADOS REAIS ===")
+        # Criar facade
         facade = SistemaAlocacaoFacade()
-        dados_reais = facade.carregar_dados_csv('oferta_cc_2025_1.csv')
+        
+        # Demonstrar padrões de projeto
+        print("=== DEMONSTRAÇÃO DOS PADRÕES DE PROJETO ===\n")
+        sistema = facade.demonstrar_padroes_projeto()
+        
+        # Executar alocação com dados de demonstração
+        print("\n" + "="*60)
+        print("🚀 EXECUTANDO ALOCAÇÃO COM DADOS DE DEMONSTRAÇÃO")
+        print("="*60)
+        resultado = facade.executar_alocacao_otimizada(sistema)
+        
+        if resultado['sucesso']:
+            print("✅ Alocação de demonstração concluída com sucesso!")
+        else:
+            print(f"❌ Erro na alocação de demonstração: {resultado['erro']}")
+        
+        # Carregar e processar dados reais
+        print("\n" + "="*60)
+        print("📊 PROCESSANDO DADOS REAIS")
+        print("="*60)
+        dados_reais = facade.carregar_dados_reais('oferta_cc_2025_1.csv')
         
         if dados_reais['sucesso']:
-            print("✓ Dados reais carregados com sucesso!")
-            print("Sistema pronto para alocação com dados reais!")
+            print("✅ Dados reais processados com sucesso!")
+            print("🎯 Sistema pronto para alocação com dados reais!")
         else:
-            print("⚠ Dados reais não disponíveis, usando sistema de exemplo")
+            print(f"⚠ Dados reais não disponíveis: {dados_reais['erro']}")
         
-        print("\n=== SISTEMA FUNCIONANDO PERFEITAMENTE ===")
-        print("Todos os padrões de projeto implementados com sucesso!")
+        print("\n" + "="*80)
+        print("🎉 SISTEMA FUNCIONANDO PERFEITAMENTE!")
+        print("✅ Todos os padrões de projeto implementados com sucesso!")
+        print("✅ Alocação otimizada usando programação linear!")
+        print("✅ Interface simplificada e experiência do usuário melhorada!")
+        print("="*80)
         
     except ImportError as e:
-        print(f"Erro de importação: {e}")
+        print(f"❌ Erro de importação: {e}")
         print("Certifique-se de que todos os módulos estão disponíveis")
         return False
     except Exception as e:
-        print(f"Erro durante execução: {e}")
+        print(f"❌ Erro durante execução: {e}")
         return False
     
     return True
