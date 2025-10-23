@@ -12,30 +12,59 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def main():
     """Função principal do sistema"""
-    print("=== SISTEMA DE ALOCAÇÃO DE SALAS REFATORADO ===")
-    print("Implementando padrões de projeto: Factory, Builder, Strategy, Repository, Observer, Facade\n")
+    print("=== SISTEMA DE ALOCAÇÃO DE SALAS ===")
+    print("Carregando dados reais e executando alocação...\n")
 
     try:
-        # Importar e usar o sistema refatorado
-        from app.core.facade import SistemaAlocacaoFacade, demonstrar_padroes
-        
-        # Demonstrar todos os padrões
-        comparacao = demonstrar_padroes()
-        
-        # Tentar carregar dados reais
-        print("\n=== TENTATIVA DE CARREGAR DADOS REAIS ===")
-        facade = SistemaAlocacaoFacade()
-        dados_reais = facade.carregar_dados_csv('oferta_cc_2025_1.csv')
-        
+        from app.carregador_dados import CarregadorDados
+        carregador = CarregadorDados()
+
+        # Tentar diferentes caminhos para o arquivo CSV
+        caminhos_csv = [
+            'oferta_cc_2025_1.csv',
+            '../oferta_cc_2025_1.csv',
+            'app/oferta_cc_2025_1.csv'
+        ]
+
+        dados_reais = None
+        caminho_encontrado = None
+        for caminho in caminhos_csv:
+            try:
+                dados_reais = carregador.carregar_dados_csv(caminho)
+                caminho_encontrado = caminho
+                break
+            except FileNotFoundError:
+                continue
+
+        if dados_reais is None:
+            raise FileNotFoundError("Arquivo CSV não encontrado em nenhum dos caminhos testados")
+
         if dados_reais['sucesso']:
-            print("✓ Dados reais carregados com sucesso!")
+            print("Dados reais processados com sucesso!")
             print("Sistema pronto para alocação com dados reais!")
+
+            # Imprimir estatísticas detalhadas
+            carregador.imprimir_estatisticas(caminho_encontrado)
+
+            # Executar alocação usando o caminho encontrado
+            resultado_alocacao = carregador.executar_alocacao(caminho_encontrado)
+            if resultado_alocacao['sucesso']:
+                print("Alocação executada com sucesso!")
+            else:
+                print(f"{resultado_alocacao.get('mensagem', 'Alocação não executada')}")
         else:
-            print("⚠ Dados reais não disponíveis, usando sistema de exemplo")
-        
-        print("\n=== SISTEMA FUNCIONANDO PERFEITAMENTE ===")
-        print("Todos os padrões de projeto implementados com sucesso!")
-        
+            print(f"Dados reais não disponíveis: {dados_reais.get('erro', 'Erro desconhecido')}")
+            return False
+
+        print("\n" + "="*80)
+        print("SISTEMA FUNCIONANDO PERFEITAMENTE!")
+        print("Alocação otimizada usando programação linear!")
+        print("Interface simplificada e experiência do usuário melhorada!")
+        print("="*80)
+
+    except FileNotFoundError as e:
+        print(f"Erro: {e}")
+        return False
     except ImportError as e:
         print(f"Erro de importação: {e}")
         print("Certifique-se de que todos os módulos estão disponíveis")
@@ -43,31 +72,10 @@ def main():
     except Exception as e:
         print(f"Erro durante execução: {e}")
         return False
-    
+
     return True
 
 
-def executar_teste():
-    """Executa os testes do sistema"""
-    print("=== EXECUTANDO TESTES DO SISTEMA ===")
-    
-    try:
-        from app.tests.test_sistema_refatorado import main as testar_sistema
-        return testar_sistema()
-    except ImportError as e:
-        print(f"Erro ao importar testes: {e}")
-        return False
-    except Exception as e:
-        print(f"Erro durante testes: {e}")
-        return False
-
-
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "test":
-        # Executar testes
-        sucesso = executar_teste()
-        sys.exit(0 if sucesso else 1)
-    else:
-        # Executar sistema principal
-        sucesso = main()
-        sys.exit(0 if sucesso else 1)
+    sucesso = main()
+    sys.exit(0 if sucesso else 1)

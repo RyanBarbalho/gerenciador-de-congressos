@@ -31,7 +31,7 @@ class Materia:
     horario: str  # Formato: "Segunda 14:00-16:00"
     precisa_lab: bool
     materiais_necessarios: List[str] = field(default_factory=list)
-    
+
     def __post_init__(self):
         """Validação pós-inicialização"""
         if self.inscritos <= 0:
@@ -40,11 +40,11 @@ class Materia:
             raise ValueError("Nome da matéria não pode ser vazio")
         if not self.horario.strip():
             raise ValueError("Horário não pode ser vazio")
-    
+
     def get_capacidade_minima(self) -> int:
         """Retorna a capacidade mínima necessária"""
         return self.inscritos
-    
+
     def get_materiais_essenciais(self) -> Set[str]:
         """Retorna materiais essenciais como conjunto"""
         return set(self.materiais_necessarios)
@@ -60,7 +60,7 @@ class Sala:
     local: LocalSala
     materiais_disponiveis: List[str] = field(default_factory=list)
     custo_adicional: float = 0.0
-    
+
     def __post_init__(self):
         """Validação pós-inicialização"""
         if self.capacidade <= 0:
@@ -69,15 +69,15 @@ class Sala:
             raise ValueError("Nome da sala não pode ser vazio")
         if self.custo_adicional < 0:
             raise ValueError("Custo adicional não pode ser negativo")
-    
+
     def get_materiais_disponiveis(self) -> Set[str]:
         """Retorna materiais disponíveis como conjunto"""
         return set(self.materiais_disponiveis)
-    
+
     def calcular_espaco_ocioso(self, inscritos: int) -> int:
         """Calcula espaço ocioso para um número de inscritos"""
         return max(0, self.capacidade - inscritos)
-    
+
     def calcular_utilizacao(self, inscritos: int) -> float:
         """Calcula percentual de utilização"""
         if self.capacidade == 0:
@@ -92,7 +92,7 @@ class Alocacao:
     sala: Sala
     espaco_ocioso: int
     utilizacao_percentual: float
-    
+
     def __post_init__(self):
         """Calcula métricas automaticamente"""
         self.espaco_ocioso = self.sala.calcular_espaco_ocioso(self.materia.inscritos)
@@ -101,45 +101,60 @@ class Alocacao:
 
 class AlocacaoResultado:
     """Resultado de uma operação de alocação"""
-    
-    def __init__(self, sucesso: bool, alocacoes: List[Alocacao] = None, 
+
+    def __init__(self, sucesso: bool, alocacoes: List[Alocacao] = None,
                  erro: Optional[str] = None):
         self.sucesso = sucesso
         self.alocacoes = alocacoes or []
         self.erro = erro
         self.metricas = self._calcular_metricas() if sucesso else None
-    
+
     def _calcular_metricas(self) -> dict:
         """Calcula métricas do resultado"""
         if not self.alocacoes:
             return {}
-        
+
         total_ocioso = sum(a.espaco_ocioso for a in self.alocacoes)
         utilizacao_media = sum(a.utilizacao_percentual for a in self.alocacoes) / len(self.alocacoes)
-        salas_im_usadas = sum(1 for a in self.alocacoes if a.sala.local == LocalSala.IM)
-        
+
+        # Contar salas IM únicas utilizadas (não alocações)
+        salas_im_unicas = set()
+        for a in self.alocacoes:
+            if a.sala.local == LocalSala.IM:
+                salas_im_unicas.add(a.sala.id)
+
+        salas_im_usadas = len(salas_im_unicas)
+
+        # Calcular custo baseado em salas únicas, não alocações
+        salas_im_unicas_objetos = {}
+        for a in self.alocacoes:
+            if a.sala.local == LocalSala.IM:
+                salas_im_unicas_objetos[a.sala.id] = a.sala
+
+        custo_total = sum(sala.custo_adicional for sala in salas_im_unicas_objetos.values())
+
         return {
             'total_alocacoes': len(self.alocacoes),
             'espaco_ocioso_total': total_ocioso,
             'utilizacao_media': utilizacao_media,
             'salas_im_usadas': salas_im_usadas,
-            'custo_total': sum(a.sala.custo_adicional for a in self.alocacoes)
+            'custo_total': custo_total
         }
 
 
 class Observer(ABC):
     """Interface para observadores do processo de alocação"""
-    
+
     @abstractmethod
     def on_progress(self, etapa: str, progresso: float):
         """Notifica progresso da alocação"""
         pass
-    
+
     @abstractmethod
     def on_sucesso(self, resultado: AlocacaoResultado):
         """Notifica sucesso da alocação"""
         pass
-    
+
     @abstractmethod
     def on_erro(self, erro: str):
         """Notifica erro na alocação"""
@@ -148,28 +163,28 @@ class Observer(ABC):
 
 class Subject:
     """Sujeito para padrão Observer"""
-    
+
     def __init__(self):
         self._observers: List[Observer] = []
-    
+
     def adicionar_observer(self, observer: Observer):
         """Adiciona um observador"""
         self._observers.append(observer)
-    
+
     def remover_observer(self, observer: Observer):
         """Remove um observador"""
         self._observers.remove(observer)
-    
+
     def notificar_progresso(self, etapa: str, progresso: float):
         """Notifica progresso para todos os observadores"""
         for observer in self._observers:
             observer.on_progress(etapa, progresso)
-    
+
     def notificar_sucesso(self, resultado: AlocacaoResultado):
         """Notifica sucesso para todos os observadores"""
         for observer in self._observers:
             observer.on_sucesso(resultado)
-    
+
     def notificar_erro(self, erro: str):
         """Notifica erro para todos os observadores"""
         for observer in self._observers:

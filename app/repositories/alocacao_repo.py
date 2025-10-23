@@ -189,13 +189,48 @@ class AlocacaoLinearStrategy(AlocacaoStrategy):
                     self.problema += restricao <= 1, f"sem_conflito_{horario}_{sala.id}"
     
     def _agrupar_por_horario(self, materias: List[Materia]) -> Dict[str, List[Materia]]:
-        """Agrupa matérias por horário"""
+        """Agrupa matérias por horário, considerando sobreposições temporais"""
         horarios = {}
+        
         for materia in materias:
-            if materia.horario not in horarios:
-                horarios[materia.horario] = []
-            horarios[materia.horario].append(materia)
+            # Extrair slots de tempo da matéria
+            slots_materia = self._extrair_slots_tempo(materia.horario)
+            
+            # Para cada slot de tempo, adicionar a matéria ao grupo correspondente
+            for slot in slots_materia:
+                if slot not in horarios:
+                    horarios[slot] = []
+                horarios[slot].append(materia)
+        
         return horarios
+    
+    def _extrair_slots_tempo(self, horario_str: str) -> List[str]:
+        """Extrai slots de tempo individuais de um horário complexo"""
+        import re
+        
+        # Padrão para extrair dias e horários
+        # Ex: "Segunda/Quinta 09:00-09:50/10:00-10:50" -> ["Segunda 09:00-09:50", "Segunda 10:00-10:50", "Quinta 09:00-09:50", "Quinta 10:00-10:50"]
+        
+        # Dividir por " | " se houver múltiplos horários
+        horarios_parts = horario_str.split(' | ')
+        slots = []
+        
+        for part in horarios_parts:
+            # Extrair dias e horários
+            match = re.match(r'([^0-9]+)\s+(.+)', part.strip())
+            if not match:
+                continue
+                
+            dias_str, horarios_str = match.groups()
+            dias = [d.strip() for d in dias_str.split('/')]
+            horarios = [h.strip() for h in horarios_str.split('/')]
+            
+            # Combinar cada dia com cada horário
+            for dia in dias:
+                for horario in horarios:
+                    slots.append(f"{dia} {horario}")
+        
+        return slots if slots else [horario_str]
     
     def _criar_alocacoes(self, materias: List[Materia], salas: List[Sala], 
                         solucao: Dict[str, str]) -> List[Alocacao]:
