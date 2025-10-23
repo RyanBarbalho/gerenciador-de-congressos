@@ -40,37 +40,37 @@ def main():
             raise FileNotFoundError("Arquivo CSV não encontrado em nenhum dos caminhos testados")
 
         if dados_reais['sucesso']:
-            print("✅ Dados reais processados com sucesso!")
-            print("🎯 Sistema pronto para alocação com dados reais!")
+            print("Dados reais processados com sucesso!")
+            print("Sistema pronto para alocação com dados reais!")
 
             # Imprimir estatísticas detalhadas
-            carregador.imprimir_estatisticas()
+            carregador.imprimir_estatisticas(caminho_encontrado)
 
             # Executar alocação usando o caminho encontrado
             resultado_alocacao = carregador.executar_alocacao(caminho_encontrado)
             if resultado_alocacao['sucesso']:
-                print("✅ Alocação executada com sucesso!")
+                print("Alocação executada com sucesso!")
             else:
-                print(f"ℹ️ {resultado_alocacao.get('mensagem', 'Alocação não executada')}")
+                print(f"{resultado_alocacao.get('mensagem', 'Alocação não executada')}")
         else:
-            print(f"⚠ Dados reais não disponíveis: {dados_reais.get('erro', 'Erro desconhecido')}")
+            print(f"Dados reais não disponíveis: {dados_reais.get('erro', 'Erro desconhecido')}")
             return False
 
         print("\n" + "="*80)
-        print("🎉 SISTEMA FUNCIONANDO PERFEITAMENTE!")
-        print("✅ Alocação otimizada usando programação linear!")
-        print("✅ Interface simplificada e experiência do usuário melhorada!")
+        print("SISTEMA FUNCIONANDO PERFEITAMENTE!")
+        print("Alocação otimizada usando programação linear!")
+        print("Interface simplificada e experiência do usuário melhorada!")
         print("="*80)
 
     except FileNotFoundError as e:
-        print(f"❌ {e}")
+        print(f"Erro: {e}")
         return False
     except ImportError as e:
-        print(f"❌ Erro de importação: {e}")
+        print(f"Erro de importação: {e}")
         print("Certifique-se de que todos os módulos estão disponíveis")
         return False
     except Exception as e:
-        print(f"❌ Erro durante execução: {e}")
+        print(f"Erro durante execução: {e}")
         return False
 
     return True
