@@ -18,34 +18,36 @@ def main():
     try:
         from app.carregador_dados import CarregadorDados
         carregador = CarregadorDados()
-        
+
         # Tentar diferentes caminhos para o arquivo CSV
         caminhos_csv = [
             'oferta_cc_2025_1.csv',
             '../oferta_cc_2025_1.csv',
             'app/oferta_cc_2025_1.csv'
         ]
-        
+
         dados_reais = None
+        caminho_encontrado = None
         for caminho in caminhos_csv:
             try:
                 dados_reais = carregador.carregar_dados_csv(caminho)
+                caminho_encontrado = caminho
                 break
             except FileNotFoundError:
                 continue
-        
+
         if dados_reais is None:
             raise FileNotFoundError("Arquivo CSV não encontrado em nenhum dos caminhos testados")
-        
+
         if dados_reais['sucesso']:
             print("✅ Dados reais processados com sucesso!")
             print("🎯 Sistema pronto para alocação com dados reais!")
-            
+
             # Imprimir estatísticas detalhadas
             carregador.imprimir_estatisticas()
-            
-            # Executar alocação
-            resultado_alocacao = carregador.executar_alocacao('oferta_cc_2025_1.csv')
+
+            # Executar alocação usando o caminho encontrado
+            resultado_alocacao = carregador.executar_alocacao(caminho_encontrado)
             if resultado_alocacao['sucesso']:
                 print("✅ Alocação executada com sucesso!")
             else:
@@ -53,13 +55,13 @@ def main():
         else:
             print(f"⚠ Dados reais não disponíveis: {dados_reais.get('erro', 'Erro desconhecido')}")
             return False
-        
+
         print("\n" + "="*80)
         print("🎉 SISTEMA FUNCIONANDO PERFEITAMENTE!")
         print("✅ Alocação otimizada usando programação linear!")
         print("✅ Interface simplificada e experiência do usuário melhorada!")
         print("="*80)
-        
+
     except FileNotFoundError as e:
         print(f"❌ {e}")
         return False
@@ -70,7 +72,7 @@ def main():
     except Exception as e:
         print(f"❌ Erro durante execução: {e}")
         return False
-    
+
     return True
 
 
