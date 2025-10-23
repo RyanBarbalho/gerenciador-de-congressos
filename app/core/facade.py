@@ -1,38 +1,32 @@
 """
-Facade simplificada para alocação de salas usando programação linear
+Facade para alocação de salas usando programação linear
 Implementa padrões de projeto: Factory, Builder, Strategy, Repository, Observer, Facade
 """
 
 from typing import Dict, Any, List
 from ..models.domain import Observer, Materia, Sala, TipoSala, LocalSala
-from ..factories.creators import MateriaFactory, SalaFactory, FactoryManager
-from ..builders.constructors import AlocadorBuilder, SistemaAlocacaoBuilder
-from ..repositories.alocacao_repo import AlocacaoLinearStrategy, AlocacaoGulosaStrategy, AlocacaoManager, AlocacaoRepository
-from ..services.data_loader import CarregadorDadosRefatorado, SistemaCompletoRefatorado
-from ..strategies.interfaces import CompatibilidadePadrao, CompatibilidadeFlexivel
-# from ..validators.validators import ValidatorPadrao
+from ..factories.creators import FactoryManager
+from ..builders.constructors import AlocadorBuilder
+from ..repositories.alocacao_repo import AlocacaoLinearStrategy, AlocacaoRepository, AlocacaoManager
+from ..services.data_loader import CarregadorDadosRefatorado
+from ..strategies.interfaces import CompatibilidadePadrao
 
 
 class ConsoleObserver(Observer):
     """Observador para exibir progresso no console"""
     
     def on_progress(self, etapa: str, progresso: float):
-        """Exibe progresso no console"""
         print(f"[{progresso:5.1f}%] {etapa}")
     
     def on_sucesso(self, resultado):
-        """Exibe resultado de sucesso"""
         print(f"✓ Alocação concluída com sucesso!")
         print(f"  📊 {resultado.metricas['total_alocacoes']} matérias alocadas")
         print(f"  📈 Utilização média: {resultado.metricas['utilizacao_media']:.1f}%")
         print(f"  🏢 Salas utilizadas: {len(set(a.sala.id for a in resultado.alocacoes))}")
         print(f"  💰 Custo total: R$ {resultado.metricas.get('custo_total', 0):.2f}")
-        
-        # Mostrar resumo por sala
         self._mostrar_resumo_por_sala(resultado.alocacoes)
     
     def on_erro(self, erro: str):
-        """Exibe erro"""
         print(f"❌ Erro na alocação: {erro}")
     
     def _mostrar_resumo_por_sala(self, alocacoes):
@@ -49,19 +43,15 @@ class ConsoleObserver(Observer):
         for alocacao in alocacoes:
             sala_id = alocacao.sala.id
             if sala_id not in salas_materias:
-                salas_materias[sala_id] = {
-                    'sala': alocacao.sala,
-                    'materias': []
-                }
+                salas_materias[sala_id] = {'sala': alocacao.sala, 'materias': []}
             salas_materias[sala_id]['materias'].append(alocacao)
         
-        # Ordenar salas por nome
+        # Mostrar resumo por sala
         for sala_id in sorted(salas_materias.keys()):
             info_sala = salas_materias[sala_id]
             sala = info_sala['sala']
             materias = info_sala['materias']
             
-            # Calcular estatísticas da sala
             total_alunos = sum(m.inscritos for m in [a.materia for a in materias])
             utilizacao_media = sum(a.utilizacao_percentual for a in materias) / len(materias)
             
@@ -77,7 +67,6 @@ class ConsoleObserver(Observer):
                 print(f"     ⏰ {materia.horario}")
                 print(f"     👥 {materia.inscritos} alunos | {alocacao.utilizacao_percentual:.1f}% | {alocacao.espaco_ocioso} vagas ociosas")
         
-        # Mostrar resumo por horário
         self._mostrar_resumo_por_horario(alocacoes)
     
     def _mostrar_resumo_por_horario(self, alocacoes):
@@ -97,7 +86,7 @@ class ConsoleObserver(Observer):
                 horarios_materias[horario] = []
             horarios_materias[horario].append(alocacao)
         
-        # Ordenar horários
+        # Mostrar resumo por horário
         for horario in sorted(horarios_materias.keys()):
             materias_horario = horarios_materias[horario]
             total_alunos = sum(m.inscritos for m in [a.materia for a in materias_horario])
@@ -116,7 +105,7 @@ class ConsoleObserver(Observer):
 
 
 class SistemaAlocacaoFacade:
-    """Facade simplificada para alocação de salas usando programação linear"""
+    """Facade para alocação de salas usando programação linear"""
     
     def __init__(self):
         self.factory_manager = FactoryManager()
@@ -125,23 +114,19 @@ class SistemaAlocacaoFacade:
     
     def _adicionar_observador_padrao(self):
         """Adiciona observador padrão"""
-        observer = ConsoleObserver()
-        self.observers.append(observer)
+        self.observers.append(ConsoleObserver())
     
     def adicionar_observador(self, observer: Observer):
         """Adiciona observador personalizado"""
         self.observers.append(observer)
     
-    def criar_sistema_demonstracao(self) -> Dict[str, Any]:
+    def criar_sistema_basico(self) -> Dict[str, Any]:
         """Cria um sistema básico para demonstração"""
         print("\n" + "="*60)
         print("🎯 CRIANDO SISTEMA DE DEMONSTRAÇÃO")
         print("="*60)
         
-        # Usar Builder Pattern
-        builder = AlocadorBuilder()
-        
-        # Criar dados de exemplo usando Factory Pattern
+        # Dados de exemplo
         materias_dados = [
             {'id': 'MAT001', 'nome': 'Cálculo I', 'inscritos': 45, 'horario': 'Segunda 08:00-10:00'},
             {'id': 'MAT002', 'nome': 'Cálculo II', 'inscritos': 38, 'horario': 'Segunda 08:00-10:00'},
@@ -160,48 +145,42 @@ class SistemaAlocacaoFacade:
             {'id': 'IM101', 'nome': 'Sala IM-101', 'capacidade': 60, 'tipo': 'aula', 'local': 'im', 'custo_adicional': 10.0},
         ]
         
-        # Usar Factory Pattern para criar objetos
+        # Criar objetos usando Factory Pattern
         materias = self.factory_manager.criar_multiplas_materias(materias_dados)
         salas = self.factory_manager.criar_multiplas_salas(salas_dados)
         
         print(f"✅ {len(materias)} matérias criadas")
         print(f"✅ {len(salas)} salas criadas")
         
-        # Usar Builder Pattern para construir sistema
-        alocador = (builder
+        # Construir sistema usando Builder Pattern
+        alocador = (AlocadorBuilder()
                    .com_materias(materias)
                    .com_salas(salas)
                    .com_compatibilidade_strategy(CompatibilidadePadrao())
                    .com_factory_manager(self.factory_manager)
                    .construir())
         
-        return {
-            'alocador': alocador,
-            'materias': materias,
-            'salas': salas
-        }
+        return {'alocador': alocador, 'materias': materias, 'salas': salas}
     
-    def executar_alocacao_otimizada(self, sistema: Dict[str, Any]) -> Dict[str, Any]:
-        """Executa alocação usando programação linear otimizada"""
+    def executar_alocacao(self, sistema: Dict[str, Any]) -> Dict[str, Any]:
+        """Executa alocação usando programação linear"""
         print("\n" + "="*60)
-        print("🚀 EXECUTANDO ALOCAÇÃO OTIMIZADA (PROGRAMAÇÃO LINEAR)")
+        print("🚀 EXECUTANDO ALOCAÇÃO (PROGRAMAÇÃO LINEAR)")
         print("="*60)
         
         alocador = sistema['alocador']
         materias = sistema['materias']
         salas = sistema['salas']
         
-        # Usar Repository Pattern
+        # Configurar repositório
         repository = AlocacaoRepository()
         for materia in materias:
             repository.salvar_materia(materia)
         for sala in salas:
             repository.salvar_sala(sala)
         
-        # Usar Strategy Pattern para algoritmo de alocação
+        # Configurar estratégia e manager
         strategy = AlocacaoLinearStrategy(CompatibilidadePadrao())
-        
-        # Usar Manager Pattern
         manager = AlocacaoManager(repository)
         manager.definir_estrategia(strategy)
         
@@ -221,10 +200,7 @@ class SistemaAlocacaoFacade:
                 'metricas': resultado.metricas
             }
         else:
-            return {
-                'sucesso': False,
-                'erro': resultado.erro
-            }
+            return {'sucesso': False, 'erro': resultado.erro}
     
     def carregar_dados_reais(self, arquivo_csv: str = "oferta_cc_2025_1.csv") -> Dict[str, Any]:
         """Carrega dados reais de um arquivo CSV"""
@@ -233,27 +209,19 @@ class SistemaAlocacaoFacade:
         print("="*60)
         
         try:
-            # Usar carregador refatorado
             carregador = CarregadorDadosRefatorado()
             
-            # Adicionar observadores ao carregador
+            # Adicionar observadores
             for observer in self.observers:
                 carregador.adicionar_observer(observer)
             
             # Carregar dados
             repository = carregador.carregar_dados_csv(arquivo_csv)
-            
-            # Obter materias e salas do repositório
             materias = list(repository.buscar_materias())
             salas = list(repository.buscar_salas())
             
             # Mostrar estatísticas
             self._mostrar_estatisticas_dados(materias, salas)
-            
-            # Executar alocação automaticamente
-            print("\n" + "="*60)
-            print("🎯 EXECUTANDO ALOCAÇÃO AUTOMÁTICA")
-            print("="*60)
             
             # Criar sistema com dados reais
             builder = AlocadorBuilder()
@@ -264,13 +232,8 @@ class SistemaAlocacaoFacade:
                        .com_factory_manager(self.factory_manager)
                        .construir())
             
-            sistema_real = {
-                'alocador': alocador,
-                'materias': materias,
-                'salas': salas
-            }
-            
-            resultado_alocacao = self.executar_alocacao_otimizada(sistema_real)
+            sistema_real = {'alocador': alocador, 'materias': materias, 'salas': salas}
+            resultado_alocacao = self.executar_alocacao(sistema_real)
             
             return {
                 'sucesso': True,
@@ -298,7 +261,6 @@ class SistemaAlocacaoFacade:
         total_inscritos = sum(m.inscritos for m in materias)
         capacidade_total = sum(s.capacidade for s in salas)
         utilizacao_potencial = (total_inscritos / capacidade_total) * 100 if capacidade_total > 0 else 0
-        
         materias_lab = sum(1 for m in materias if m.precisa_lab)
         
         print(f"📚 Total de matérias: {total_materias}")
@@ -319,20 +281,14 @@ class SistemaAlocacaoFacade:
         tipos_salas = {}
         for sala in salas:
             tipo = sala.tipo.value
-            if tipo not in tipos_salas:
-                tipos_salas[tipo] = 0
-            tipos_salas[tipo] += 1
-        
+            tipos_salas[tipo] = tipos_salas.get(tipo, 0) + 1
         print(f"\n🏷️ Tipos de salas: {tipos_salas}")
         
         # Localizações
         locais = {}
         for sala in salas:
             local = sala.local.value
-            if local not in locais:
-                locais[local] = 0
-            locais[local] += 1
-        
+            locais[local] = locais.get(local, 0) + 1
         print(f"📍 Localizações: {locais}")
     
     def demonstrar_padroes_projeto(self):
@@ -342,7 +298,7 @@ class SistemaAlocacaoFacade:
         print("="*80)
         
         print("\n1. 🏭 FACTORY PATTERN - Criação consistente de objetos")
-        sistema = self.criar_sistema_demonstracao()
+        sistema = self.criar_sistema_basico()
         
         print("\n2. 🏗️ BUILDER PATTERN - Construção flexível do sistema")
         print("   ✅ Sistema construído com configurações personalizadas")

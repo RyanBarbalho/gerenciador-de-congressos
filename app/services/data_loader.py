@@ -133,7 +133,52 @@ class CSVRepository(Repository):
         return horario_str
     
     def _extrair_salas_unicas(self) -> Dict[str, Dict[str, Any]]:
-        """Extrai salas únicas dos dados"""
+        """Extrai salas do CSV de salas"""
+        try:
+            # Carregar CSV de salas
+            df_salas = pd.read_csv('relacao_salas.csv')
+            salas = {}
+            
+            for _, row in df_salas.iterrows():
+                nome_sala = str(row['sala']).strip()
+                bloco = str(row['bloco']).strip()
+                capacidade = int(row['capacidade'])
+                
+                # Determinar tipo de sala baseado no nome
+                tipo = self._determinar_tipo_sala_por_nome(nome_sala)
+                
+                # Determinar localização baseada no bloco
+                localizacao = "im" if bloco == "IM" else "ic"
+                
+                # Determinar materiais disponíveis
+                materiais = ["projetor", "quadro"]
+                if tipo == "laboratorio":
+                    materiais.append("computadores")
+                
+                # Calcular custo adicional
+                custo = 15.0 if localizacao == "im" else 0.0
+                
+                salas[nome_sala] = {
+                    'id': f"SALA_{len(salas)+1:03d}",
+                    'nome': nome_sala,
+                    'capacidade': capacidade,
+                    'tipo': tipo,
+                    'local': localizacao,
+                    'materiais_disponiveis': materiais,
+                    'custo_adicional': custo
+                }
+            
+            return salas
+            
+        except FileNotFoundError:
+            print("⚠️ Arquivo relacao_salas.csv não encontrado. Usando salas do CSV de matérias.")
+            return self._extrair_salas_original()
+        except Exception as e:
+            print(f"⚠️ Erro ao carregar salas: {e}. Usando salas do CSV de matérias.")
+            return self._extrair_salas_original()
+    
+    def _extrair_salas_original(self) -> Dict[str, Dict[str, Any]]:
+        """Extrai salas únicas dos dados originais (fallback)"""
         salas = {}
         
         for _, row in self.df.iterrows():
@@ -158,6 +203,17 @@ class CSVRepository(Repository):
                     }
         
         return salas
+    
+    def _determinar_tipo_sala_por_nome(self, nome_sala: str) -> str:
+        """Determina tipo de sala baseado no nome"""
+        nome_lower = nome_sala.lower()
+        
+        if any(keyword in nome_lower for keyword in ['auditório', 'auditorio']):
+            return "auditorio"
+        elif any(keyword in nome_lower for keyword in ['lab', 'laboratório', 'robótica', 'circ']):
+            return "laboratorio"
+        else:
+            return "aula"
     
     def _corrigir_nome_sala(self, nome_sala: str) -> str:
         """Corrige nomes de salas com grafia incorreta"""
