@@ -266,7 +266,7 @@ class SistemaAlocacaoFacade:
         print(f"Total de matérias: {total_materias}")
         print(f"Total de salas: {total_salas}")
         print(f"Total de inscritos: {total_inscritos}")
-        print(f"🪑 Capacidade total: {capacidade_total}")
+        print(f"Capacidade total: {capacidade_total}")
         print(f"Utilização potencial: {utilizacao_potencial:.2f}%")
         print(f"Matérias que precisam de laboratório: {materias_lab}")
 
