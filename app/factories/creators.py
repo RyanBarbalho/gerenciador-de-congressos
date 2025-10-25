@@ -101,8 +101,10 @@ class SalaFactoryPadrao(SalaFactory):
         local_map = {
             'ic': LocalSala.IC,
             'im': LocalSala.IM,
+            'if': LocalSala.IF,
             'instituto de computação': LocalSala.IC,
-            'instituto de matemática': LocalSala.IM
+            'instituto de matemática': LocalSala.IM,
+            'instituto de física': LocalSala.IF
         }
 
         local_lower = str(local_str).lower()
@@ -197,6 +199,8 @@ class SalaFactoryCSV(SalaFactory):
 
         if 'im' in local_str or 'matemática' in local_str:
             return 'im'
+        elif 'if' in local_str or 'física' in local_str:
+            return 'if'
         else:
             return 'ic'
 

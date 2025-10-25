@@ -146,6 +146,7 @@ class CSVRepository(Repository):
                 nome_sala = str(row['sala']).strip()
                 bloco = str(row['bloco']).strip()
                 capacidade = int(row['capacidade'])
+
                 # Tratar valores NaN na coluna tipo
                 tipo_raw = row.get('tipo', 0)
                 if pd.isna(tipo_raw) or tipo_raw == '':
@@ -158,7 +159,16 @@ class CSVRepository(Repository):
                 tipo = self._determinar_tipo_sala_por_nome(nome_sala)
 
                 # Determinar localização baseada no bloco
-                localizacao = "im" if bloco == "IM" else "ic"
+                if bloco == "IM":
+                    localizacao = "im"
+                elif bloco == "IF":
+                    localizacao = "if"
+                else:
+                    localizacao = "ic"
+
+
+
+
 
                 # Determinar materiais disponíveis baseado no tipo de equipamento
                 materiais = ["projetor", "quadro"]
@@ -191,7 +201,8 @@ class CSVRepository(Repository):
             print("Arquivo relacao_salas.csv não encontrado. Usando salas do CSV de matérias.")
             return self._extrair_salas_original()
         except Exception as e:
-            print(f"Erro ao carregar salas: {e}. Usando salas do CSV de matérias.")
+            print(f"ERRO ao carregar salas do CSV: {e}")
+            print("Usando salas do CSV de matérias como fallback.")
             return self._extrair_salas_original()
 
     def _extrair_salas_original(self) -> Dict[str, Dict[str, Any]]:

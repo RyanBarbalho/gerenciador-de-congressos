@@ -21,7 +21,16 @@ class CompatibilidadePadrao(CompatibilidadeStrategy):
     """Estratégia padrão de compatibilidade"""
 
     def eh_compativel(self, materia: Materia, sala: Sala) -> bool:
-        """Verifica compatibilidade baseada em tipo de sala e material"""
+        """Verifica compatibilidade baseada em tipo de sala, material e localização"""
+
+        # Restrição de localização: matérias de Física (IF) só podem ir para salas do IF
+        if materia.id.startswith('IF') and sala.local.value != "if":
+            return False
+
+        # Matérias não-Física não podem ir para salas do IF
+        if not materia.id.startswith('IF') and sala.local.value == "if":
+            return False
+
         # Se a matéria precisa de material especial, só pode ir para laboratório
         if materia.material > 0 and sala.tipo.value != "laboratorio":
             return False
@@ -51,6 +60,15 @@ class CompatibilidadeFlexivel(CompatibilidadeStrategy):
 
     def eh_compativel(self, materia: Materia, sala: Sala) -> bool:
         """Verifica compatibilidade com flexibilidade para materiais opcionais"""
+
+        # Restrição de localização: matérias de Física (IF) só podem ir para salas do IF
+        if materia.id.startswith('IF') and sala.local.value != "if":
+            return False
+
+        # Matérias não-Física não podem ir para salas do IF
+        if not materia.id.startswith('IF') and sala.local.value == "if":
+            return False
+
         # Se a matéria precisa de material especial, só pode ir para laboratório
         if materia.material > 0 and sala.tipo.value != "laboratorio":
             return False

@@ -20,6 +20,7 @@ class LocalSala(Enum):
     """Localização das salas"""
     IC = "ic"  # Instituto de Computação
     IM = "im"  # Instituto de Matemática
+    IF = "if"  # Instituto de Física
 
 
 @dataclass
