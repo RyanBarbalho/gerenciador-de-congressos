@@ -29,8 +29,7 @@ class Materia:
     nome: str
     inscritos: int
     horario: str  # Formato: "Segunda 14:00-16:00"
-    precisa_lab: bool
-    materiais_necessarios: List[str] = field(default_factory=list)
+    material: int  # 0 = nenhum, 1 = computadores, 2 = robótica, 3 = eletrônica
 
     def __post_init__(self):
         """Validação pós-inicialização"""
@@ -45,10 +44,6 @@ class Materia:
         """Retorna a capacidade mínima necessária"""
         return self.inscritos
 
-    def get_materiais_essenciais(self) -> Set[str]:
-        """Retorna materiais essenciais como conjunto"""
-        return set(self.materiais_necessarios)
-
 
 @dataclass
 class Sala:
@@ -58,6 +53,7 @@ class Sala:
     capacidade: int
     tipo: TipoSala
     local: LocalSala
+    tipo_equipamento: int  # 1 = computadores, 2 = robótica, 3 = eletrônica, 0 = nenhum
     materiais_disponiveis: List[str] = field(default_factory=list)
     custo_adicional: float = 0.0
 

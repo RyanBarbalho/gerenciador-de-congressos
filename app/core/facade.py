@@ -62,7 +62,7 @@ class ConsoleObserver(Observer):
 
             for alocacao in sorted(materias, key=lambda a: a.materia.nome):
                 materia = alocacao.materia
-                lab_info = " [LAB]" if materia.precisa_lab else ""
+                lab_info = " [LAB]" if materia.material > 0 else ""
                 print(f"   • {materia.nome}{lab_info}")
                 print(f"     {materia.horario}")
                 print(f"     {materia.inscritos} alunos | {alocacao.utilizacao_percentual:.1f}% | {alocacao.espaco_ocioso} vagas ociosas")
@@ -98,7 +98,7 @@ class ConsoleObserver(Observer):
             for alocacao in sorted(materias_horario, key=lambda a: a.materia.nome):
                 materia = alocacao.materia
                 sala = alocacao.sala
-                lab_info = " [LAB]" if materia.precisa_lab else ""
+                lab_info = " [LAB]" if materia.material > 0 else ""
                 print(f"   • {materia.nome}{lab_info}")
                 print(f"     {sala.nome} ({sala.tipo.value.upper()}) - {sala.local.value.upper()}")
                 print(f"     {materia.inscritos}/{sala.capacidade} | {alocacao.utilizacao_percentual:.1f}% | {alocacao.espaco_ocioso} vagas")
@@ -261,7 +261,7 @@ class SistemaAlocacaoFacade:
         total_inscritos = sum(m.inscritos for m in materias)
         capacidade_total = sum(s.capacidade for s in salas)
         utilizacao_potencial = (total_inscritos / capacidade_total) * 100 if capacidade_total > 0 else 0
-        materias_lab = sum(1 for m in materias if m.precisa_lab)
+        materias_lab = sum(1 for m in materias if m.material > 0)
 
         print(f"Total de matérias: {total_materias}")
         print(f"Total de salas: {total_salas}")

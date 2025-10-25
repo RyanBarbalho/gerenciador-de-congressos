@@ -59,12 +59,15 @@ class CSVRepository(Repository):
 
     def _extrair_dados_materia(self, row: pd.Series) -> Dict[str, Any]:
         """Extrai dados de matéria de uma linha do CSV"""
+        material_value = int(row.get('material', 0))
+
         return {
             'codigo': str(row['codigo']),
             'nome': str(row['nome']),
             'matriculados': int(row['matriculados']),
             'horario': self._mapear_horario(row['horario']),
-            'capacidade': int(row['capacidade'])
+            'capacidade': int(row['capacidade']),
+            'material': material_value  # 1 = precisa de computadores, 0 = não precisa
         }
 
     def _mapear_horario(self, horario_str: str) -> str:
@@ -143,6 +146,13 @@ class CSVRepository(Repository):
                 nome_sala = str(row['sala']).strip()
                 bloco = str(row['bloco']).strip()
                 capacidade = int(row['capacidade'])
+                # Tratar valores NaN na coluna tipo
+                tipo_raw = row.get('tipo', 0)
+                if pd.isna(tipo_raw) or tipo_raw == '':
+                    tipo_equipamento = 0
+                else:
+                    tipo_equipamento = int(tipo_raw)  # 1 = computadores, 2 = robótica, 3 = eletrônica, 0 = nenhum
+
 
                 # Determinar tipo de sala baseado no nome
                 tipo = self._determinar_tipo_sala_por_nome(nome_sala)
@@ -150,23 +160,30 @@ class CSVRepository(Repository):
                 # Determinar localização baseada no bloco
                 localizacao = "im" if bloco == "IM" else "ic"
 
-                # Determinar materiais disponíveis
+                # Determinar materiais disponíveis baseado no tipo de equipamento
                 materiais = ["projetor", "quadro"]
-                if tipo == "laboratorio":
+                if tipo_equipamento == 1:  # Computadores
                     materiais.append("computadores")
+                elif tipo_equipamento == 2:  # Robótica
+                    materiais.extend(["robôs", "sensores"])
+                elif tipo_equipamento == 3:  # Eletrônica
+                    materiais.extend(["multímetros", "osciloscópios"])
 
                 # Calcular custo adicional
                 custo = 15.0 if localizacao == "im" else 0.0
 
-                salas[nome_sala] = {
+                dados_sala = {
                     'id': f"SALA_{len(salas)+1:03d}",
                     'nome': nome_sala,
                     'capacidade': capacidade,
                     'tipo': tipo,
                     'local': localizacao,
+                    'tipo_equipamento': tipo_equipamento,
                     'materiais_disponiveis': materiais,
                     'custo_adicional': custo
                 }
+
+                salas[nome_sala] = dados_sala
 
             return salas
 
@@ -369,8 +386,8 @@ class CarregadorDadosRefatorado:
             local = sala.local.value
             locais[local] = locais.get(local, 0) + 1
 
-        # Matérias que precisam de laboratório
-        lab_count = sum(1 for m in materias if m.precisa_lab)
+        # Matérias que precisam de laboratório (material > 0)
+        lab_count = sum(1 for m in materias if m.material > 0)
 
         return {
             'total_materias': total_materias,

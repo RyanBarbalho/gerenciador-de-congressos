@@ -119,16 +119,12 @@ class CarregadorDados:
                 continue
 
             horario = self._mapear_horario(row['horario'])
-            precisa_lab = self._precisa_laboratorio(row['nome'])
-            materiais = ["projetor", "quadro"] + (["computadores"] if precisa_lab else [])
 
             materia = {
                 'id': str(row['codigo']),
                 'nome': str(row['nome']),
                 'inscritos': int(row['matriculados']),
                 'horario': horario,
-                'precisa_lab': precisa_lab,
-                'materiais_necessarios': materiais,
                 'capacidade': int(row['capacidade'])
             }
 
@@ -296,12 +292,6 @@ class CarregadorDados:
             periodo_fim = periodos[-1].split('-')[1]
             return f"{dias_str} {periodo_inicio}-{periodo_fim}"
 
-    def _precisa_laboratorio(self, nome_materia: str) -> bool:
-        """Determina se matéria precisa de laboratório"""
-        nome_lower = nome_materia.lower()
-        lab_keywords = ['programação', 'banco de dados', 'redes', 'sistemas operacionais',
-                       'inteligência artificial', 'computação gráfica', 'compiladores']
-        return any(keyword in nome_lower for keyword in lab_keywords)
 
     def _determinar_tipo_sala(self, local_str: str, nome_materia: str) -> str:
         """Determina tipo de sala"""
@@ -398,7 +388,7 @@ class CarregadorDados:
         # Matérias por horário
         horarios = estatisticas.get('horarios', {})
         if horarios:
-            print(f"\n🕐 Matérias por horário:")
+            print(f"\nMatérias por horário:")
             for horario, count in sorted(horarios.items()):
                 print(f"   {horario}: {count}")
 
