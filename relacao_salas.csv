@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 sala,bloco,capacidade,tipo
 Sala de Aula 01,IC,40,
 Sala de Aula 02,IC,40,
@@ -19,25 +18,3 @@ Sala de Aula 207,IM,40,
 Sala de Aula 206,IM,40,
 Sala de Aula 205,IM,40,
 Sala de Aula 204,IM,40,
-=======
-sala,bloco,capacidade
-Sala de Aula 01,IC,40
-Sala de Aula 02,IC,40
-Sala de Aula 03,IC,40
-Mini-sala 01,IC,20
-Mini-auditório,IC,80
-Laboratório de Robótica,IC,20
-Laboratório de Graduação 01,IC,60
-Laboratório de Graduação 02,IC,40
-Laboratório de Graduação 03,IC,20
-Lab. de Circ. Elétricos e Eletrônicos,IC,30
-Auditório,CEPETEC,100
-Laboratório da Pós 01,IM,60
-Laboratório da Pós 02,IM,60
-Sala de Aula da Pós 01,IM,60
-Sala de Aula da Pós 02,IM,60
-Sala de Aula 207,IM,40
-Sala de Aula 206,IM,40
-Sala de Aula 205,IM,40
-Sala de Aula 204,IM,40
->>>>>>> 0a7308459468a012623caf93bf61369038d1c03d
