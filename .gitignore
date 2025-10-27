@@ -132,6 +132,7 @@ dmypy.json
 *.csv
 !relacao_salas.csv
 !oferta_cc_2025_1.csv
+!oferta_ec_2025_1.csv
 
 # IDE
 .vscode/

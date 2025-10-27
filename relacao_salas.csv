@@ -1,20 +1,23 @@
-sala,bloco,capacidade
-Sala de Aula 01,IC,40
-Sala de Aula 02,IC,40
-Sala de Aula 03,IC,40
-Mini-sala 01,IC,20
-Mini-auditório,IC,80
-Laboratório de Robótica,IC,20
-Laboratório de Graduação 01,IC,60
-Laboratório de Graduação 02,IC,40
-Laboratório de Graduação 03,IC,20
-Lab. de Circ. Elétricos e Eletrônicos,IC,30
-Auditório,CEPETEC,100
-Laboratório da Pós 01,IM,60
-Laboratório da Pós 02,IM,60
-Sala de Aula da Pós 01,IM,60
-Sala de Aula da Pós 02,IM,60
-Sala de Aula 207,IM,40
-Sala de Aula 206,IM,40
-Sala de Aula 205,IM,40
-Sala de Aula 204,IM,40
+sala,bloco,capacidade,tipo
+Sala de Aula 01,IC,45,
+Sala de Aula 02,IC,45,
+Sala de Aula 03,IC,45,
+Mini-sala 01,IC,20,
+Mini-auditório,IC,90,
+Laboratório de Robótica,IC,40,2
+Laboratório de Graduação 01,IC,60,1
+Laboratório de Graduação 02,IC,40,1
+Laboratório de Graduação 03,IC,20,1
+Lab. de Circ. Elétricos e Eletrônicos,IC,40,3
+Auditório,CEPETEC,100,
+Laboratório da Pós 01,IM,60,1
+Laboratório da Pós 02,IM,60,1
+Sala de Aula da Pós 01,IM,60,
+Sala de Aula da Pós 02,IM,60,
+Sala de Aula 207,IM,60,
+Sala de Aula 206,IM,60,
+Sala de Aula 205,IM,60,
+Sala de Aula 204,IM,60,
+IF Sala 02,IF,60,
+Laboratório de Ensino 2 - IF,IF,30,
+Laboratório de Ensino 3 - IF,IF,25,
