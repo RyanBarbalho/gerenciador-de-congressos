@@ -7,7 +7,7 @@ import pulp
 import pandas as pd
 from typing import List, Dict, Optional, Any
 from ..models.domain import Materia, Sala, Alocacao, AlocacaoResultado, Subject
-from ..strategies.interfaces import AlocacaoStrategy, CompatibilidadeStrategy, CompatibilidadePadrao, SolverStrategy
+from ..strategies.interfaces import AlocacaoStrategy, CompatibilidadeStrategy, Compatibilidade, SolverStrategy
 from ..factories.creators import FactoryManager
 
 
@@ -253,61 +253,6 @@ class AlocacaoLinearStrategy(AlocacaoStrategy):
                 alocacoes.append(alocacao)
 
         return alocacoes
-
-
-class AlocacaoGulosaStrategy(AlocacaoStrategy):
-    """Estratégia de alocação usando algoritmo guloso"""
-
-    def alocar(self, materias: List[Materia], salas: List[Sala]) -> AlocacaoResultado:
-        """Executa alocação usando algoritmo guloso"""
-        try:
-            alocacoes = []
-            salas_disponiveis = salas.copy()
-
-            # Ordenar matérias por número de inscritos (maior primeiro)
-            materias_ordenadas = sorted(materias, key=lambda m: m.inscritos, reverse=True)
-
-            for materia in materias_ordenadas:
-                # Encontrar melhor sala disponível
-                melhor_sala = self._encontrar_melhor_sala(materia, salas_disponiveis)
-
-                if melhor_sala:
-                    alocacao = Alocacao(
-                        materia=materia,
-                        sala=melhor_sala,
-                        espaco_ocioso=melhor_sala.calcular_espaco_ocioso(materia.inscritos),
-                        utilizacao_percentual=melhor_sala.calcular_utilizacao(materia.inscritos)
-                    )
-                    alocacoes.append(alocacao)
-                    salas_disponiveis.remove(melhor_sala)
-                else:
-                    return AlocacaoResultado(sucesso=False,
-                                           erro=f"Nenhuma sala disponível para {materia.nome}")
-
-            return AlocacaoResultado(sucesso=True, alocacoes=alocacoes)
-
-        except Exception as e:
-            return AlocacaoResultado(sucesso=False, erro=str(e))
-
-    def _encontrar_melhor_sala(self, materia: Materia, salas: List[Sala]) -> Optional[Sala]:
-        """Encontra a melhor sala para uma matéria"""
-        salas_compatíveis = [s for s in salas if self.compatibilidade.eh_compativel(materia, s)]
-
-        if not salas_compatíveis:
-            return None
-
-        # Ordenar por critérios de qualidade
-        def score_sala(sala: Sala) -> tuple:
-            # Menor espaço ocioso é melhor
-            espaco_ocioso = sala.calcular_espaco_ocioso(materia.inscritos)
-            # Menor custo adicional é melhor
-            custo = sala.custo_adicional
-            # Preferir IC sobre IM
-            preferencia_local = 0 if sala.local.value == 'ic' else 1
-
-            return (espaco_ocioso, custo, preferencia_local)
-
-        return min(salas_compatíveis, key=score_sala)
 
 
 class AlocacaoManager:

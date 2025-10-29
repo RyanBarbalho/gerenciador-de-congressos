@@ -10,11 +10,11 @@ from pathlib import Path
 
 # Imports do sistema refatorado
 try:
-    from app.core.facade import SistemaAlocacaoFacade
-    from app.services.data_loader import SistemaCompletoRefatorado
-    from app.models.domain import Materia, Sala, TipoSala, LocalSala
-    from app.factories.creators import FactoryManager
-    from app.strategies.interfaces import ValidatorPadrao, Repository
+    from core.facade import SistemaAlocacaoFacade
+    from services.data_loader import SistemaCompletoRefatorado
+    from models.domain import Materia, Sala, TipoSala, LocalSala
+    from factories.creators import FactoryManager
+    from strategies.interfaces import ValidatorPadrao, Repository
     REFATORADO_DISPONIVEL = True
 except ImportError:
     REFATORADO_DISPONIVEL = False
@@ -413,14 +413,14 @@ class CarregadorDados:
         if REFATORADO_DISPONIVEL and dados['sistema'] == 'refatorado':
             try:
                 # Criar alocador usando Builder Pattern
-                from app.builders.constructors import AlocadorBuilder
-                from app.strategies.interfaces import CompatibilidadePadrao
+                from builders.constructors import AlocadorBuilder
+                from strategies.interfaces import Compatibilidade
 
                 builder = AlocadorBuilder()
                 alocador = (builder
                            .com_materias(dados['materias'])
                            .com_salas(dados['salas'])
-                           .com_compatibilidade_strategy(CompatibilidadePadrao())
+                           .com_compatibilidade_strategy(Compatibilidade())
                            .com_factory_manager(self.factory_manager)
                            .construir())
 

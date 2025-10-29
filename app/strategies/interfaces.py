@@ -4,8 +4,8 @@ Implementa Strategy Pattern para diferentes algoritmos de alocação.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Set, Optional
-from ..models.domain import Materia, Sala, Alocacao, AlocacaoResultado, Observer
+from typing import List, Dict, Optional
+from ..models.domain import Materia, Sala, AlocacaoResultado
 
 
 class CompatibilidadeStrategy(ABC):
@@ -17,7 +17,7 @@ class CompatibilidadeStrategy(ABC):
         pass
 
 
-class CompatibilidadePadrao(CompatibilidadeStrategy):
+class Compatibilidade(CompatibilidadeStrategy):
     """Estratégia padrão de compatibilidade"""
 
     def eh_compativel(self, materia: Materia, sala: Sala) -> bool:
@@ -52,49 +52,11 @@ class CompatibilidadePadrao(CompatibilidadeStrategy):
         return True
 
 
-class CompatibilidadeFlexivel(CompatibilidadeStrategy):
-    """Estratégia flexível que permite algumas incompatibilidades"""
-
-    def __init__(self, materiais_opcionais: Set[str] = None):
-        self.materiais_opcionais = materiais_opcionais or set()
-
-    def eh_compativel(self, materia: Materia, sala: Sala) -> bool:
-        """Verifica compatibilidade com flexibilidade para materiais opcionais"""
-
-        # Restrição de localização: matérias de Física (IF) só podem ir para salas do IF
-        if materia.id.startswith('IF') and sala.local.value != "if":
-            return False
-
-        # Matérias não-Física não podem ir para salas do IF
-        if not materia.id.startswith('IF') and sala.local.value == "if":
-            return False
-
-        # Se a matéria precisa de material especial, só pode ir para laboratório
-        if materia.material > 0 and sala.tipo.value != "laboratorio":
-            return False
-
-        # Verificar compatibilidade de material/equipamento (mesma lógica da padrão)
-        if materia.material == 1 and sala.tipo_equipamento != 1:
-            # Matéria precisa de computadores, sala deve ter computadores
-            return False
-        elif materia.material == 2 and sala.tipo_equipamento != 2:
-            # Matéria de robótica, sala deve ter equipamentos de robótica
-            return False
-        elif materia.material == 3 and sala.tipo_equipamento != 3:
-            # Matéria de eletrônica, sala deve ter equipamentos de eletrônica
-            return False
-        elif materia.material == 0:
-            # Matéria sem material especial, pode ir para qualquer sala
-            pass
-
-        return True
-
-
 class AlocacaoStrategy(ABC):
     """Estratégia para algoritmos de alocação"""
 
     def __init__(self, compatibilidade: CompatibilidadeStrategy = None):
-        self.compatibilidade = compatibilidade or CompatibilidadePadrao()
+        self.compatibilidade = compatibilidade or Compatibilidade()
 
     @abstractmethod
     def alocar(self, materias: List[Materia], salas: List[Sala]) -> AlocacaoResultado:

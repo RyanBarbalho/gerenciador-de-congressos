@@ -9,7 +9,7 @@ from ..factories.creators import FactoryManager
 from ..builders.constructors import AlocadorBuilder
 from ..repositories.alocacao_repo import AlocacaoLinearStrategy, AlocacaoRepository, AlocacaoManager
 from ..services.data_loader import CarregadorDadosRefatorado
-from ..strategies.interfaces import CompatibilidadePadrao
+from ..strategies.interfaces import Compatibilidade
 
 
 class ConsoleObserver(Observer):
@@ -156,7 +156,7 @@ class SistemaAlocacaoFacade:
         alocador = (AlocadorBuilder()
                    .com_materias(materias)
                    .com_salas(salas)
-                   .com_compatibilidade_strategy(CompatibilidadePadrao())
+                   .com_compatibilidade_strategy(Compatibilidade())
                    .com_factory_manager(self.factory_manager)
                    .construir())
 
@@ -180,7 +180,7 @@ class SistemaAlocacaoFacade:
             repository.salvar_sala(sala)
 
         # Configurar estratégia e manager
-        strategy = AlocacaoLinearStrategy(CompatibilidadePadrao())
+        strategy = AlocacaoLinearStrategy(Compatibilidade())
         manager = AlocacaoManager(repository)
         manager.definir_estrategia(strategy)
 
@@ -228,7 +228,7 @@ class SistemaAlocacaoFacade:
             alocador = (builder
                        .com_materias(materias)
                        .com_salas(salas)
-                       .com_compatibilidade_strategy(CompatibilidadePadrao())
+                       .com_compatibilidade_strategy(Compatibilidade())
                        .com_factory_manager(self.factory_manager)
                        .construir())
 

@@ -149,11 +149,12 @@ def main():
         facade = SistemaAlocacaoFacade()
 
         # Criar sistema combinado manualmente
-        from app.repositories.alocacao_repo import AlocacaoLinearStrategy, CompatibilidadePadrao
+        from app.repositories.alocacao_repo import AlocacaoLinearStrategy
+        from app.strategies.interfaces import Compatibilidade
         from app.factories.creators import FactoryManager
 
         factory_manager = FactoryManager()
-        compatibilidade = CompatibilidadePadrao()
+        compatibilidade = Compatibilidade()
         alocador = AlocacaoLinearStrategy(compatibilidade)
 
         resultado = alocador.alocar(todas_materias, todas_salas)
