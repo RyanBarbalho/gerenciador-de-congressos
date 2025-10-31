@@ -100,43 +100,77 @@ class AlocacaoResultado:
     """Resultado de uma operação de alocação"""
 
     def __init__(self, sucesso: bool, alocacoes: List[Alocacao] = None,
-                 erro: Optional[str] = None):
+                 erro: Optional[str] = None, todas_materias: List[Materia] = None,
+                 todas_salas: List[Sala] = None):
         self.sucesso = sucesso
         self.alocacoes = alocacoes or []
         self.erro = erro
+        self.todas_materias = todas_materias or []
+        self.todas_salas = todas_salas or []
         self.metricas = self._calcular_metricas() if sucesso else None
 
     def _calcular_metricas(self) -> dict:
-        """Calcula métricas do resultado"""
+        """Calcula métricas do resultado usando o módulo de métricas completo"""
         if not self.alocacoes:
             return {}
 
-        total_ocioso = sum(a.espaco_ocioso for a in self.alocacoes)
-        utilizacao_media = sum(a.utilizacao_percentual for a in self.alocacoes) / len(self.alocacoes)
+        try:
+            from ..services.metricas import CalculadorMetricas, MetricasCompletas
+            
+            metricas_completas = CalculadorMetricas.calcular_metricas_completas(
+                self.alocacoes,
+                self.todas_materias,
+                self.todas_salas
+            )
+            
+            # Retornar dicionário compatível com código existente
+            return {
+                'total_alocacoes': len(self.alocacoes),
+                
+                # Métricas de Utilização (3.3.1)
+                'utilizacao_media': metricas_completas.utilizacao.utilizacao_media,
+                'espaco_ocioso_total': metricas_completas.utilizacao.espaco_ocioso_total,
+                'distribuicao_utilizacao': metricas_completas.utilizacao.distribuicao_utilizacao,
+                
+                # Métricas de Eficiência (3.3.2)
+                'taxa_alocacao': metricas_completas.eficiencia.taxa_alocacao,
+                'custo_total': metricas_completas.eficiencia.custo_total,
+                'numero_salas_utilizadas': metricas_completas.eficiencia.numero_salas_utilizadas,
+                
+                # Validação de Restrições (3.3.3)
+                'todas_restricoes_satisfeitas': metricas_completas.validacao.todas_restricoes_satisfeitas,
+                'validacoes': metricas_completas.validacao.validacoes,
+                
+                # Objeto completo para acesso programático
+                'metricas_completas': metricas_completas,
+                
+                # Compatibilidade com código antigo
+                'salas_im_usadas': len(set(a.sala.id for a in self.alocacoes if a.sala.local == LocalSala.IM))
+            }
+        except ImportError:
+            # Fallback para cálculo básico se módulo não estiver disponível
+            total_ocioso = sum(a.espaco_ocioso for a in self.alocacoes)
+            utilizacao_media = sum(a.utilizacao_percentual for a in self.alocacoes) / len(self.alocacoes)
+            
+            salas_im_unicas = set()
+            for a in self.alocacoes:
+                if a.sala.local == LocalSala.IM:
+                    salas_im_unicas.add(a.sala.id)
+            
+            salas_im_unicas_objetos = {}
+            for a in self.alocacoes:
+                if a.sala.local == LocalSala.IM:
+                    salas_im_unicas_objetos[a.sala.id] = a.sala
+            
+            custo_total = sum(sala.custo_adicional for sala in salas_im_unicas_objetos.values())
 
-        # Contar salas IM únicas utilizadas (não alocações)
-        salas_im_unicas = set()
-        for a in self.alocacoes:
-            if a.sala.local == LocalSala.IM:
-                salas_im_unicas.add(a.sala.id)
-
-        salas_im_usadas = len(salas_im_unicas)
-
-        # Calcular custo baseado em salas únicas, não alocações
-        salas_im_unicas_objetos = {}
-        for a in self.alocacoes:
-            if a.sala.local == LocalSala.IM:
-                salas_im_unicas_objetos[a.sala.id] = a.sala
-
-        custo_total = sum(sala.custo_adicional for sala in salas_im_unicas_objetos.values())
-
-        return {
-            'total_alocacoes': len(self.alocacoes),
-            'espaco_ocioso_total': total_ocioso,
-            'utilizacao_media': utilizacao_media,
-            'salas_im_usadas': salas_im_usadas,
-            'custo_total': custo_total
-        }
+            return {
+                'total_alocacoes': len(self.alocacoes),
+                'espaco_ocioso_total': total_ocioso,
+                'utilizacao_media': utilizacao_media,
+                'salas_im_usadas': len(salas_im_unicas),
+                'custo_total': custo_total
+            }
 
 
 class Observer(ABC):
