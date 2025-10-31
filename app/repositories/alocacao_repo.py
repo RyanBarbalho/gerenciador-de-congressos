@@ -124,12 +124,27 @@ class AlocacaoLinearStrategy(AlocacaoStrategy):
             if sucesso:
                 solucao = self.solver_strategy.extrair_solucao(self.problema)
                 alocacoes = self._criar_alocacoes(materias, salas, solucao)
-                return AlocacaoResultado(sucesso=True, alocacoes=alocacoes)
+                return AlocacaoResultado(
+                    sucesso=True, 
+                    alocacoes=alocacoes,
+                    todas_materias=materias,
+                    todas_salas=salas
+                )
             else:
-                return AlocacaoResultado(sucesso=False, erro="Não foi possível encontrar solução ótima")
+                return AlocacaoResultado(
+                    sucesso=False, 
+                    erro="Não foi possível encontrar solução ótima",
+                    todas_materias=materias,
+                    todas_salas=salas
+                )
 
         except Exception as e:
-            return AlocacaoResultado(sucesso=False, erro=str(e))
+            return AlocacaoResultado(
+                sucesso=False, 
+                erro=str(e),
+                todas_materias=materias,
+                todas_salas=salas
+            )
 
     def _criar_variaveis_decisao(self, materias: List[Materia], salas: List[Sala]):
         """Cria variáveis de decisão"""
